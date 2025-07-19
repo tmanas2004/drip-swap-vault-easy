@@ -2,8 +2,26 @@ import { Send, Download, ArrowUpDown, CreditCard, QrCode, Plus } from "lucide-re
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { SwapInterface } from "@/components/SwapInterface";
+import { useState } from "react";
 
 export const WalletActions = () => {
+  const [showSwap, setShowSwap] = useState(false);
+
+  if (showSwap) {
+    return (
+      <div className="space-y-4">
+        <Button 
+          variant="outline" 
+          onClick={() => setShowSwap(false)}
+          className="mb-4"
+        >
+          ← Back to Actions
+        </Button>
+        <SwapInterface />
+      </div>
+    );
+  }
   return (
     <div className="space-y-6">
       {/* Quick Actions */}
@@ -21,7 +39,11 @@ export const WalletActions = () => {
               <Download className="w-6 h-6 text-success" />
               <span className="text-sm">Receive</span>
             </Button>
-            <Button variant="wallet" className="flex-col h-20 gap-2">
+            <Button 
+              variant="wallet" 
+              className="flex-col h-20 gap-2"
+              onClick={() => setShowSwap(true)}
+            >
               <ArrowUpDown className="w-6 h-6 text-accent" />
               <span className="text-sm">Swap</span>
             </Button>

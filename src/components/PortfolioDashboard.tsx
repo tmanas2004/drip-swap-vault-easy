@@ -3,20 +3,32 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ConnectedWalletBalance } from "@/components/ConnectedWalletBalance";
+import { NetworkToggle } from "@/components/NetworkToggle";
+import { useTokenBalances } from "@/hooks/useTokenBalances";
+import { useAccount } from "wagmi";
 import { useState } from "react";
 
 export const PortfolioDashboard = () => {
   const [isBalanceHidden, setIsBalanceHidden] = useState(false);
+  const [isTestnet, setIsTestnet] = useState(false);
+  const { isConnected } = useAccount();
+  const { tokenBalances, totalValue, totalChange, isLoading } = useTokenBalances();
 
-  const portfolioData = {
+  // Use real data if wallet is connected, otherwise show demo data
+  const portfolioData = isConnected ? {
+    totalBalance: totalValue,
+    totalChangePercent: totalChange,
+    totalChangeAmount: (totalValue * totalChange) / 100,
+    assets: tokenBalances
+  } : {
     totalBalance: 45672.89,
     totalChangePercent: 5.67,
     totalChangeAmount: 2456.78,
     assets: [
-      { symbol: "BTC", name: "Bitcoin", amount: 0.75, value: 28945.67, change: 3.45, icon: "₿" },
-      { symbol: "ETH", name: "Ethereum", amount: 8.2, value: 12567.45, change: -1.23, icon: "Ξ" },
-      { symbol: "USDT", name: "Tether", amount: 3456.78, value: 3456.78, change: 0.01, icon: "₮" },
-      { symbol: "BNB", name: "BNB", amount: 15.6, value: 892.34, change: 8.92, icon: "◆" },
+      { symbol: "BTC", name: "Bitcoin", amount: "0.75", value: 28945.67, change: 3.45, icon: "₿" },
+      { symbol: "ETH", name: "Ethereum", amount: "8.2", value: 12567.45, change: -1.23, icon: "Ξ" },
+      { symbol: "USDT", name: "Tether", amount: "3456.78", value: 3456.78, change: 0.01, icon: "₮" },
+      { symbol: "BNB", name: "BNB", amount: "15.6", value: 892.34, change: 8.92, icon: "◆" },
     ]
   };
 
@@ -27,6 +39,9 @@ export const PortfolioDashboard = () => {
 
   return (
     <div className="space-y-6">
+      {/* Network Toggle */}
+      <NetworkToggle onToggle={setIsTestnet} />
+      
       {/* Connected Wallet Balance */}
       <ConnectedWalletBalance />
       
@@ -50,7 +65,11 @@ export const PortfolioDashboard = () => {
         <CardContent>
           <div className="space-y-2">
             <div className="text-3xl font-bold text-foreground">
-              {formatCurrency(portfolioData.totalBalance)}
+              {isLoading && isConnected ? (
+                <div className="animate-pulse bg-muted h-8 w-40 rounded"></div>
+              ) : (
+                formatCurrency(portfolioData.totalBalance)
+              )}
             </div>
             <div className="flex items-center gap-2">
               <div className={`flex items-center gap-1 ${portfolioData.totalChangePercent >= 0 ? 'text-success' : 'text-destructive'}`}>
@@ -80,7 +99,7 @@ export const PortfolioDashboard = () => {
               Your Assets
             </CardTitle>
             <Badge variant="secondary" className="text-xs">
-              {portfolioData.assets.length} Assets
+              {portfolioData.assets.length} Assets {isConnected && !isTestnet && "• Live Data"}
             </Badge>
           </div>
         </CardHeader>
@@ -106,9 +125,9 @@ export const PortfolioDashboard = () => {
                     {formatCurrency(asset.value)}
                   </div>
                   <div className="flex items-center gap-1 text-sm">
-                    <span className="text-muted-foreground">
-                      {isBalanceHidden ? "****" : asset.amount.toLocaleString()} {asset.symbol}
-                    </span>
+                   <span className="text-muted-foreground">
+                     {isBalanceHidden ? "****" : asset.amount} {asset.symbol}
+                   </span>
                     <div className={`flex items-center gap-1 ml-2 ${asset.change >= 0 ? 'text-success' : 'text-destructive'}`}>
                       {asset.change >= 0 ? (
                         <ArrowUpRight className="w-3 h-3" />

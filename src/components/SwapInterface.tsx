@@ -1,0 +1,264 @@
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ArrowUpDown, RefreshCw } from 'lucide-react';
+import { useAccount, useBalance } from 'wagmi';
+import axios from 'axios';
+
+interface Token {
+  symbol: string;
+  name: string;
+  address: string;
+  decimals: number;
+  logoURI?: string;
+}
+
+interface SwapQuote {
+  fromTokenAmount: string;
+  toTokenAmount: string;
+  estimatedGas: string;
+  price: string;
+}
+
+const POPULAR_TOKENS: Token[] = [
+  { symbol: 'ETH', name: 'Ethereum', address: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', decimals: 18 },
+  { symbol: 'USDT', name: 'Tether USD', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6 },
+  { symbol: 'USDC', name: 'USD Coin', address: '0xA0b86a33E6441E435D33c4EBa1f5CbCa3cE6de6c', decimals: 6 },
+  { symbol: 'WBTC', name: 'Wrapped Bitcoin', address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', decimals: 8 },
+];
+
+export const SwapInterface = () => {
+  const { address, chain } = useAccount();
+  const [fromToken, setFromToken] = useState<Token>(POPULAR_TOKENS[0]);
+  const [toToken, setToToken] = useState<Token>(POPULAR_TOKENS[1]);
+  const [fromAmount, setFromAmount] = useState('');
+  const [toAmount, setToAmount] = useState('');
+  const [quote, setQuote] = useState<SwapQuote | null>(null);
+  const [isLoadingQuote, setIsLoadingQuote] = useState(false);
+  const [showTokenSelector, setShowTokenSelector] = useState<'from' | 'to' | null>(null);
+
+  const { data: fromTokenBalance } = useBalance({
+    address,
+    token: fromToken.address === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' ? undefined : fromToken.address as `0x${string}`
+  });
+
+  // Get quote from 1inch API (demo implementation)
+  const getSwapQuote = async (from: Token, to: Token, amount: string) => {
+    if (!amount || !address || !chain) return;
+
+    setIsLoadingQuote(true);
+    try {
+      // Mock API call - in production, use 1inch API or Uniswap SDK
+      const mockQuote: SwapQuote = {
+        fromTokenAmount: amount,
+        toTokenAmount: (parseFloat(amount) * 0.998).toFixed(6), // Mock 0.2% slippage
+        estimatedGas: '150000',
+        price: '0.998'
+      };
+      
+      setQuote(mockQuote);
+      setToAmount(mockQuote.toTokenAmount);
+    } catch (error) {
+      console.error('Failed to get swap quote:', error);
+    } finally {
+      setIsLoadingQuote(false);
+    }
+  };
+
+  useEffect(() => {
+    if (fromAmount && parseFloat(fromAmount) > 0) {
+      const debounceTimer = setTimeout(() => {
+        getSwapQuote(fromToken, toToken, fromAmount);
+      }, 500);
+      return () => clearTimeout(debounceTimer);
+    } else {
+      setToAmount('');
+      setQuote(null);
+    }
+  }, [fromAmount, fromToken, toToken, address, chain]);
+
+  const handleSwapTokens = () => {
+    const tempToken = fromToken;
+    setFromToken(toToken);
+    setToToken(tempToken);
+    setFromAmount(toAmount);
+    setToAmount(fromAmount);
+  };
+
+  const handleTokenSelect = (token: Token) => {
+    if (showTokenSelector === 'from') {
+      setFromToken(token);
+    } else if (showTokenSelector === 'to') {
+      setToToken(token);
+    }
+    setShowTokenSelector(null);
+  };
+
+  const executeSwap = async () => {
+    if (!quote || !address) return;
+
+    try {
+      // In production, this would call the actual swap contract
+      console.log('Executing swap:', {
+        from: fromToken,
+        to: toToken,
+        amount: fromAmount,
+        quote
+      });
+      
+      // Mock success for demo
+      alert('Swap executed successfully! (Demo mode)');
+    } catch (error) {
+      console.error('Swap failed:', error);
+      alert('Swap failed. Please try again.');
+    }
+  };
+
+  const formatBalance = (balance: any) => {
+    if (!balance) return '0.00';
+    return parseFloat(balance.formatted).toFixed(6);
+  };
+
+  return (
+    <Card className="shadow-card">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <ArrowUpDown className="w-5 h-5 text-primary" />
+          Swap Tokens
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* From Token */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">From</span>
+            <span className="text-xs text-muted-foreground">
+              Balance: {formatBalance(fromTokenBalance)} {fromToken.symbol}
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowTokenSelector('from')}
+              className="min-w-24"
+            >
+              {fromToken.symbol}
+            </Button>
+            <Input
+              type="number"
+              placeholder="0.0"
+              value={fromAmount}
+              onChange={(e) => setFromAmount(e.target.value)}
+              className="flex-1"
+            />
+          </div>
+        </div>
+
+        {/* Swap Direction Button */}
+        <div className="flex justify-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleSwapTokens}
+            className="rounded-full bg-muted hover:bg-muted/80"
+          >
+            <ArrowUpDown className="w-4 h-4" />
+          </Button>
+        </div>
+
+        {/* To Token */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">To</span>
+            {quote && (
+              <span className="text-xs text-muted-foreground">
+                Rate: 1 {fromToken.symbol} = {quote.price} {toToken.symbol}
+              </span>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowTokenSelector('to')}
+              className="min-w-24"
+            >
+              {toToken.symbol}
+            </Button>
+            <Input
+              type="number"
+              placeholder="0.0"
+              value={toAmount}
+              readOnly
+              className="flex-1"
+            />
+          </div>
+        </div>
+
+        {/* Token Selector Modal */}
+        {showTokenSelector && (
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+            <Card className="w-80 max-h-96 overflow-y-auto">
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-lg">Select Token</CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowTokenSelector(null)}
+                  >
+                    ✕
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {POPULAR_TOKENS.map((token) => (
+                  <Button
+                    key={token.address}
+                    variant="ghost"
+                    className="w-full justify-start gap-3 h-12"
+                    onClick={() => handleTokenSelect(token)}
+                  >
+                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                      {token.symbol.slice(0, 2)}
+                    </div>
+                    <div className="text-left">
+                      <div className="font-medium">{token.symbol}</div>
+                      <div className="text-xs text-muted-foreground">{token.name}</div>
+                    </div>
+                  </Button>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Swap Quote Info */}
+        {quote && (
+          <div className="bg-muted/30 rounded-lg p-3 space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Estimated Gas</span>
+              <span>{quote.estimatedGas}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Price Impact</span>
+              <span className="text-success">~0.2%</span>
+            </div>
+          </div>
+        )}
+
+        {/* Swap Button */}
+        <Button
+          onClick={executeSwap}
+          disabled={!quote || !address || isLoadingQuote}
+          className="w-full"
+        >
+          {isLoadingQuote ? (
+            <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+          ) : null}
+          {!address ? 'Connect Wallet' : isLoadingQuote ? 'Getting Quote...' : 'Swap Tokens'}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+};
