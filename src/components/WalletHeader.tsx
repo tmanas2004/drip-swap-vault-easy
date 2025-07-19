@@ -1,5 +1,7 @@
 import { Wallet, Bell, Settings, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { WalletConnector } from "@/components/WalletConnector";
+import { NetworkSwitcher } from "@/components/NetworkSwitcher";
 
 export const WalletHeader = () => {
   return (
@@ -16,16 +18,20 @@ export const WalletHeader = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon">
-            <Bell className="w-5 h-5" />
-          </Button>
-          <Button variant="ghost" size="icon">
-            <Settings className="w-5 h-5" />
-          </Button>
-          <Button variant="ghost" size="icon" className="md:hidden">
-            <Menu className="w-5 h-5" />
-          </Button>
+        <div className="flex items-center gap-3">
+          <NetworkSwitcher />
+          <WalletConnector />
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon">
+              <Bell className="w-5 h-5" />
+            </Button>
+            <Button variant="ghost" size="icon">
+              <Settings className="w-5 h-5" />
+            </Button>
+            <Button variant="ghost" size="icon" className="md:hidden">
+              <Menu className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
       </div>
     </header>

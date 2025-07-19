@@ -2,6 +2,7 @@ import { ArrowUpRight, ArrowDownRight, TrendingUp, Eye, EyeOff } from "lucide-re
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ConnectedWalletBalance } from "@/components/ConnectedWalletBalance";
 import { useState } from "react";
 
 export const PortfolioDashboard = () => {
@@ -26,6 +27,9 @@ export const PortfolioDashboard = () => {
 
   return (
     <div className="space-y-6">
+      {/* Connected Wallet Balance */}
+      <ConnectedWalletBalance />
+      
       {/* Total Portfolio Value */}
       <Card className="bg-gradient-secondary border-border shadow-card">
         <CardHeader className="pb-3">
