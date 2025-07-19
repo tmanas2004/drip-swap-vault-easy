@@ -1,0 +1,159 @@
+import { Send, Download, ArrowUpDown, CreditCard, QrCode, Plus } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+
+export const WalletActions = () => {
+  return (
+    <div className="space-y-6">
+      {/* Quick Actions */}
+      <Card className="shadow-card">
+        <CardHeader>
+          <CardTitle className="text-lg">Quick Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <Button variant="wallet" className="flex-col h-20 gap-2">
+              <Send className="w-6 h-6 text-primary" />
+              <span className="text-sm">Send</span>
+            </Button>
+            <Button variant="wallet" className="flex-col h-20 gap-2">
+              <Download className="w-6 h-6 text-success" />
+              <span className="text-sm">Receive</span>
+            </Button>
+            <Button variant="wallet" className="flex-col h-20 gap-2">
+              <ArrowUpDown className="w-6 h-6 text-accent" />
+              <span className="text-sm">Swap</span>
+            </Button>
+            <Button variant="wallet" className="flex-col h-20 gap-2">
+              <CreditCard className="w-6 h-6 text-purple-400" />
+              <span className="text-sm">Buy</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* DeFi Features */}
+      <Card className="shadow-card">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              DeFi Vault
+              <Badge variant="secondary" className="bg-gradient-primary text-primary-foreground">
+                New
+              </Badge>
+            </CardTitle>
+            <Button variant="outline" size="sm">
+              <Plus className="w-4 h-4 mr-1" />
+              Add Protocol
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-4 border border-border rounded-lg hover:bg-muted/30 transition-colors cursor-pointer">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold text-foreground">Staking Rewards</h3>
+                <Badge variant="secondary" className="text-success">Active</Badge>
+              </div>
+              <div className="text-2xl font-bold text-foreground mb-1">12.5% APY</div>
+              <div className="text-sm text-muted-foreground">Ethereum 2.0 Staking</div>
+              <div className="mt-3 flex justify-between text-sm">
+                <span className="text-muted-foreground">Staked: </span>
+                <span className="text-foreground font-medium">8.2 ETH</span>
+              </div>
+            </div>
+
+            <div className="p-4 border border-border rounded-lg hover:bg-muted/30 transition-colors cursor-pointer">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold text-foreground">Liquidity Pool</h3>
+                <Badge variant="secondary" className="text-primary">Earning</Badge>
+              </div>
+              <div className="text-2xl font-bold text-foreground mb-1">8.7% APR</div>
+              <div className="text-sm text-muted-foreground">USDC/ETH LP</div>
+              <div className="mt-3 flex justify-between text-sm">
+                <span className="text-muted-foreground">Provided: </span>
+                <span className="text-foreground font-medium">$12,450</span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Recent Transactions */}
+      <Card className="shadow-card">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Recent Transactions</CardTitle>
+            <Button variant="ghost" size="sm">View All</Button>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="space-y-0">
+            {[
+              { type: "Received", asset: "BTC", amount: "+0.025", value: "+$1,089.23", time: "2 min ago", status: "completed" },
+              { type: "Swapped", asset: "ETH → USDT", amount: "2.1 → 5,678", value: "$5,678.00", time: "1 hour ago", status: "completed" },
+              { type: "Sent", asset: "USDC", amount: "-500", value: "-$500.00", time: "3 hours ago", status: "completed" },
+              { type: "Staking", asset: "ETH", amount: "+0.15", value: "+$401.70", time: "1 day ago", status: "completed" },
+            ].map((tx, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between p-4 border-b border-border last:border-b-0 hover:bg-muted/30 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    tx.type === "Received" ? "bg-success/20" :
+                    tx.type === "Sent" ? "bg-destructive/20" :
+                    tx.type === "Swapped" ? "bg-accent/20" :
+                    "bg-primary/20"
+                  }`}>
+                    {tx.type === "Received" && <Download className="w-5 h-5 text-success" />}
+                    {tx.type === "Sent" && <Send className="w-5 h-5 text-destructive" />}
+                    {tx.type === "Swapped" && <ArrowUpDown className="w-5 h-5 text-accent" />}
+                    {tx.type === "Staking" && <Plus className="w-5 h-5 text-primary" />}
+                  </div>
+                  <div>
+                    <div className="font-semibold text-foreground">{tx.type}</div>
+                    <div className="text-sm text-muted-foreground">{tx.asset}</div>
+                  </div>
+                </div>
+                
+                <div className="text-right">
+                  <div className={`font-semibold ${
+                    tx.type === "Received" || tx.type === "Staking" ? "text-success" : 
+                    tx.type === "Sent" ? "text-destructive" : "text-foreground"
+                  }`}>
+                    {tx.amount}
+                  </div>
+                  <div className="text-sm text-muted-foreground">{tx.value}</div>
+                </div>
+                
+                <div className="text-right text-sm text-muted-foreground hidden md:block">
+                  <div>{tx.time}</div>
+                  <Badge variant="secondary" className="text-xs">
+                    {tx.status}
+                  </Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* QR Code Scanner */}
+      <Card className="shadow-card">
+        <CardContent className="p-6 text-center">
+          <QrCode className="w-12 h-12 text-primary mx-auto mb-4" />
+          <h3 className="font-semibold text-foreground mb-2">Quick Payment</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Scan QR codes to send payments instantly
+          </p>
+          <Button variant="gradient" className="w-full">
+            <QrCode className="w-4 h-4 mr-2" />
+            Scan QR Code
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
