@@ -3,10 +3,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SwapInterface } from "@/components/SwapInterface";
+import { SendModal } from "@/components/SendModal";
+import { ReceiveModal } from "@/components/ReceiveModal";
+import { QRScanner } from "@/components/QRScanner";
 import { useState } from "react";
 
 export const WalletActions = () => {
   const [showSwap, setShowSwap] = useState(false);
+  const [showSend, setShowSend] = useState(false);
+  const [showReceive, setShowReceive] = useState(false);
+  const [showQRScanner, setShowQRScanner] = useState(false);
 
   if (showSwap) {
     return (
@@ -31,11 +37,19 @@ export const WalletActions = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <Button variant="wallet" className="flex-col h-20 gap-2">
+            <Button 
+              variant="wallet" 
+              className="flex-col h-20 gap-2"
+              onClick={() => setShowSend(true)}
+            >
               <Send className="w-6 h-6 text-primary" />
               <span className="text-sm">Send</span>
             </Button>
-            <Button variant="wallet" className="flex-col h-20 gap-2">
+            <Button 
+              variant="wallet" 
+              className="flex-col h-20 gap-2"
+              onClick={() => setShowReceive(true)}
+            >
               <Download className="w-6 h-6 text-success" />
               <span className="text-sm">Receive</span>
             </Button>
@@ -170,12 +184,28 @@ export const WalletActions = () => {
           <p className="text-sm text-muted-foreground mb-4">
             Scan QR codes to send payments instantly
           </p>
-          <Button variant="gradient" className="w-full">
+          <Button 
+            variant="gradient" 
+            className="w-full"
+            onClick={() => setShowQRScanner(true)}
+          >
             <QrCode className="w-4 h-4 mr-2" />
             Scan QR Code
           </Button>
         </CardContent>
       </Card>
+
+      {/* Modals */}
+      <SendModal isOpen={showSend} onClose={() => setShowSend(false)} />
+      <ReceiveModal isOpen={showReceive} onClose={() => setShowReceive(false)} />
+      <QRScanner 
+        isOpen={showQRScanner}
+        onClose={() => setShowQRScanner(false)}
+        onScan={(result) => {
+          console.log('QR Scanned:', result);
+          setShowQRScanner(false);
+        }}
+      />
     </div>
   );
 };
