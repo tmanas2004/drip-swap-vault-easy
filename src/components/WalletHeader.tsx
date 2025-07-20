@@ -2,8 +2,11 @@ import { Wallet, Bell, Settings, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WalletConnector } from "@/components/WalletConnector";
 import { NetworkSwitcher } from "@/components/NetworkSwitcher";
+import { CurrencySettings } from "@/components/CurrencySettings";
+import { useState } from "react";
 
 export const WalletHeader = () => {
+  const [showCurrencySettings, setShowCurrencySettings] = useState(false);
   return (
     <header className="bg-card border-b border-border p-4">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
@@ -25,7 +28,11 @@ export const WalletHeader = () => {
             <Button variant="ghost" size="icon">
               <Bell className="w-5 h-5" />
             </Button>
-            <Button variant="ghost" size="icon">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => setShowCurrencySettings(true)}
+            >
               <Settings className="w-5 h-5" />
             </Button>
             <Button variant="ghost" size="icon" className="md:hidden">
@@ -34,6 +41,11 @@ export const WalletHeader = () => {
           </div>
         </div>
       </div>
+
+      <CurrencySettings 
+        isOpen={showCurrencySettings} 
+        onClose={() => setShowCurrencySettings(false)} 
+      />
     </header>
   );
 };

@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowUpDown, RefreshCw } from 'lucide-react';
+import { ArrowUpDown, RefreshCw, Zap } from 'lucide-react';
 import { useAccount, useBalance } from 'wagmi';
+import { useCurrency } from '@/hooks/useCurrency';
 import axios from 'axios';
 
 interface Token {
@@ -38,6 +39,7 @@ const POPULAR_TOKENS: Token[] = [
 
 export const SwapInterface = () => {
   const { address, chain } = useAccount();
+  const { formatPrice } = useCurrency();
   const [fromToken, setFromToken] = useState<Token>(POPULAR_TOKENS[0]);
   const [toToken, setToToken] = useState<Token>(POPULAR_TOKENS[1]);
   const [fromAmount, setFromAmount] = useState('');
@@ -45,6 +47,7 @@ export const SwapInterface = () => {
   const [quote, setQuote] = useState<SwapQuote | null>(null);
   const [isLoadingQuote, setIsLoadingQuote] = useState(false);
   const [showTokenSelector, setShowTokenSelector] = useState<'from' | 'to' | null>(null);
+  const [gaslessEnabled, setGaslessEnabled] = useState(true);
 
   const { data: fromTokenBalance } = useBalance({
     address,
@@ -241,17 +244,40 @@ export const SwapInterface = () => {
           </div>
         )}
 
+        {/* Gasless Toggle */}
+        <div className="flex items-center justify-between bg-muted/30 rounded-lg p-3">
+          <div className="flex items-center gap-2">
+            <Zap className="w-4 h-4 text-primary" />
+            <span className="text-sm font-medium">Gasless Swap</span>
+          </div>
+          <Button
+            variant={gaslessEnabled ? "default" : "outline"}
+            size="sm"
+            onClick={() => setGaslessEnabled(!gaslessEnabled)}
+          >
+            {gaslessEnabled ? "Enabled" : "Disabled"}
+          </Button>
+        </div>
+
         {/* Swap Quote Info */}
         {quote && (
           <div className="bg-muted/30 rounded-lg p-3 space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Estimated Gas</span>
-              <span>{quote.estimatedGas}</span>
+              <span className={gaslessEnabled ? "line-through text-muted-foreground" : ""}>
+                {gaslessEnabled ? "Free" : quote.estimatedGas}
+              </span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Price Impact</span>
               <span className="text-success">~0.2%</span>
             </div>
+            {gaslessEnabled && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Sponsor</span>
+                <span className="text-primary">DripSwap Protocol</span>
+              </div>
+            )}
           </div>
         )}
 
@@ -260,11 +286,16 @@ export const SwapInterface = () => {
           onClick={executeSwap}
           disabled={!quote || !address || isLoadingQuote}
           className="w-full"
+          variant={gaslessEnabled ? "gradient" : "default"}
         >
           {isLoadingQuote ? (
             <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+          ) : gaslessEnabled ? (
+            <Zap className="w-4 h-4 mr-2" />
           ) : null}
-          {!address ? 'Connect Wallet' : isLoadingQuote ? 'Getting Quote...' : 'Swap Tokens'}
+          {!address ? 'Connect Wallet' : 
+           isLoadingQuote ? 'Getting Quote...' : 
+           gaslessEnabled ? 'Gasless Swap' : 'Swap Tokens'}
         </Button>
       </CardContent>
     </Card>

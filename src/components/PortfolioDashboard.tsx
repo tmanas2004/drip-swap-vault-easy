@@ -1,96 +1,80 @@
-import { ArrowUpRight, ArrowDownRight, TrendingUp, Eye, EyeOff } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { ConnectedWalletBalance } from "@/components/ConnectedWalletBalance";
-import { NetworkToggle } from "@/components/NetworkToggle";
+import { TrendingUp, TrendingDown, Eye, EyeOff, RefreshCw } from "lucide-react";
 import { useTokenBalances } from "@/hooks/useTokenBalances";
+import { useCurrency } from "@/hooks/useCurrency";
 import { useAccount } from "wagmi";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 export const PortfolioDashboard = () => {
-  const [isBalanceHidden, setIsBalanceHidden] = useState(false);
-  const [isTestnet, setIsTestnet] = useState(false);
-  const { isConnected } = useAccount();
-  const { tokenBalances, totalValue, totalChange, isLoading } = useTokenBalances();
+  const { address } = useAccount();
+  const { balances, totalValue, isLoading, refetch } = useTokenBalances();
+  const { formatPrice } = useCurrency();
+  const [showBalance, setShowBalance] = useState(true);
 
-  // Use real data if wallet is connected, otherwise show demo data
-  const portfolioData = isConnected ? {
-    totalBalance: totalValue,
-    totalChangePercent: totalChange,
-    totalChangeAmount: (totalValue * totalChange) / 100,
-    assets: tokenBalances
-  } : {
-    totalBalance: 45672.89,
-    totalChangePercent: 5.67,
-    totalChangeAmount: 2456.78,
-    assets: [
-      { symbol: "BTC", name: "Bitcoin", amount: "0.75", value: 28945.67, change: 3.45, icon: "₿" },
-      { symbol: "ETH", name: "Ethereum", amount: "8.2", value: 12567.45, change: -1.23, icon: "Ξ" },
-      { symbol: "USDT", name: "Tether", amount: "3456.78", value: 3456.78, change: 0.01, icon: "₮" },
-      { symbol: "BNB", name: "BNB", amount: "15.6", value: 892.34, change: 8.92, icon: "◆" },
-    ]
-  };
-
-  const formatCurrency = (amount: number) => {
-    if (isBalanceHidden) return "****";
-    return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  };
+  const averageChange = balances.length > 0 
+    ? balances.reduce((sum, token) => sum + token.change24h, 0) / balances.length 
+    : 2.5;
 
   return (
     <div className="space-y-6">
-      {/* Network Toggle */}
-      <NetworkToggle onToggle={setIsTestnet} />
-      
-      {/* Connected Wallet Balance */}
-      <ConnectedWalletBalance />
-      
-      {/* Total Portfolio Value */}
+      {/* Total Portfolio */}
       <Card className="bg-gradient-secondary border-border shadow-card">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Total Portfolio Value
             </CardTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsBalanceHidden(!isBalanceHidden)}
-              className="h-6 w-6"
-            >
-              {isBalanceHidden ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={refetch}
+                disabled={isLoading}
+                className="h-6 w-6"
+              >
+                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowBalance(!showBalance)}
+                className="h-6 w-6"
+              >
+                {showBalance ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            <div className="text-3xl font-bold text-foreground">
-              {isLoading && isConnected ? (
-                <div className="animate-pulse bg-muted h-8 w-40 rounded"></div>
-              ) : (
-                formatCurrency(portfolioData.totalBalance)
-              )}
-            </div>
+            {isLoading ? (
+              <div className="animate-pulse bg-muted h-8 w-40 rounded"></div>
+            ) : (
+              <div className="text-3xl font-bold text-foreground">
+                {showBalance ? formatPrice(totalValue) : '••••••'}
+              </div>
+            )}
             <div className="flex items-center gap-2">
-              <div className={`flex items-center gap-1 ${portfolioData.totalChangePercent >= 0 ? 'text-success' : 'text-destructive'}`}>
-                {portfolioData.totalChangePercent >= 0 ? (
-                  <ArrowUpRight className="w-4 h-4" />
+              <div className={`flex items-center gap-1 ${averageChange >= 0 ? 'text-success' : 'text-destructive'}`}>
+                {averageChange >= 0 ? (
+                  <TrendingUp className="w-4 h-4" />
                 ) : (
-                  <ArrowDownRight className="w-4 h-4" />
+                  <TrendingDown className="w-4 h-4" />
                 )}
                 <span className="font-medium">
-                  {portfolioData.totalChangePercent >= 0 ? '+' : ''}{portfolioData.totalChangePercent}%
+                  {averageChange >= 0 ? '+' : ''}{averageChange.toFixed(2)}%
                 </span>
               </div>
-              <span className={`text-sm ${portfolioData.totalChangeAmount >= 0 ? 'text-success' : 'text-destructive'}`}>
-                {formatCurrency(Math.abs(portfolioData.totalChangeAmount))}
-              </span>
+              <span className="text-sm text-muted-foreground">24h</span>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Assets List */}
+      {/* Assets */}
       <Card className="shadow-card">
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -99,52 +83,101 @@ export const PortfolioDashboard = () => {
               Your Assets
             </CardTitle>
             <Badge variant="secondary" className="text-xs">
-              {portfolioData.assets.length} Assets {isConnected && !isTestnet && "• Live Data"}
+              {balances.length} Assets {address && "• Live Data"}
             </Badge>
           </div>
         </CardHeader>
-        <CardContent className="p-0">
-          <div className="space-y-0">
-            {portfolioData.assets.map((asset) => (
-              <div
-                key={asset.symbol}
-                className="flex items-center justify-between p-4 border-b border-border last:border-b-0 hover:bg-muted/30 transition-colors cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold">
-                    {asset.icon}
+        <CardContent className="space-y-4">
+          {isLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center justify-between p-4 border border-border rounded-lg animate-pulse">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-muted rounded-full"></div>
+                    <div className="space-y-1">
+                      <div className="w-16 h-4 bg-muted rounded"></div>
+                      <div className="w-12 h-3 bg-muted rounded"></div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="font-semibold text-foreground">{asset.symbol}</div>
-                    <div className="text-sm text-muted-foreground">{asset.name}</div>
+                  <div className="text-right space-y-1">
+                    <div className="w-20 h-4 bg-muted rounded"></div>
+                    <div className="w-16 h-3 bg-muted rounded"></div>
                   </div>
                 </div>
-
-                <div className="text-right">
-                  <div className="font-semibold text-foreground">
-                    {formatCurrency(asset.value)}
-                  </div>
-                  <div className="flex items-center gap-1 text-sm">
-                   <span className="text-muted-foreground">
-                     {isBalanceHidden ? "****" : asset.amount} {asset.symbol}
-                   </span>
-                    <div className={`flex items-center gap-1 ml-2 ${asset.change >= 0 ? 'text-success' : 'text-destructive'}`}>
-                      {asset.change >= 0 ? (
-                        <ArrowUpRight className="w-3 h-3" />
-                      ) : (
-                        <ArrowDownRight className="w-3 h-3" />
-                      )}
-                      <span>
-                        {asset.change >= 0 ? '+' : ''}{asset.change}%
+              ))}
+            </div>
+          ) : balances.length > 0 ? (
+            <div className="space-y-3">
+              {balances.map((token, index) => (
+                <div
+                  key={`${token.symbol}-${token.address}`}
+                  className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/30 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                      <span className="text-sm font-semibold text-primary">
+                        {token.symbol.slice(0, 2)}
                       </span>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-foreground">{token.symbol}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {token.balance.toFixed(6)} {token.symbol}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="text-right">
+                    <div className="font-semibold text-foreground">
+                      {showBalance ? formatPrice(token.usdValue) : '••••'}
+                    </div>
+                    <div className={`text-sm flex items-center gap-1 ${
+                      token.change24h >= 0 ? 'text-success' : 'text-destructive'
+                    }`}>
+                      {token.change24h >= 0 ? (
+                        <TrendingUp className="w-3 h-3" />
+                      ) : (
+                        <TrendingDown className="w-3 h-3" />
+                      )}
+                      {Math.abs(token.change24h).toFixed(2)}%
                     </div>
                   </div>
                 </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <div className="text-muted-foreground mb-2">No tokens found</div>
+              <div className="text-sm text-muted-foreground">
+                {address ? 'Connect to a different network or add tokens' : 'Connect your wallet to see your portfolio'}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      {/* Portfolio Allocation */}
+      {balances.length > 0 && (
+        <Card className="shadow-card">
+          <CardHeader>
+            <CardTitle className="text-lg">Portfolio Allocation</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {balances.slice(0, 5).map((token) => {
+              const percentage = totalValue > 0 ? (token.usdValue / totalValue) * 100 : 0;
+              return (
+                <div key={token.symbol} className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="font-medium text-foreground">{token.symbol}</span>
+                    <span className="text-muted-foreground">{percentage.toFixed(1)}%</span>
+                  </div>
+                  <Progress value={percentage} className="h-2" />
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
