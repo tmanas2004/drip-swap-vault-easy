@@ -6,6 +6,7 @@ import { SwapInterface } from "@/components/SwapInterface";
 import { SendModal } from "@/components/SendModal";
 import { ReceiveModal } from "@/components/ReceiveModal";
 import { QRScanner } from "@/components/QRScanner";
+import { RecentTransactions } from "@/components/RecentTransactions";
 import { useState } from "react";
 
 export const WalletActions = () => {
@@ -125,54 +126,7 @@ export const WalletActions = () => {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="space-y-0">
-            {[
-              { type: "Received", asset: "BTC", amount: "+0.025", value: "+$1,089.23", time: "2 min ago", status: "completed" },
-              { type: "Swapped", asset: "ETH → USDT", amount: "2.1 → 5,678", value: "$5,678.00", time: "1 hour ago", status: "completed" },
-              { type: "Sent", asset: "USDC", amount: "-500", value: "-$500.00", time: "3 hours ago", status: "completed" },
-              { type: "Staking", asset: "ETH", amount: "+0.15", value: "+$401.70", time: "1 day ago", status: "completed" },
-            ].map((tx, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-4 border-b border-border last:border-b-0 hover:bg-muted/30 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    tx.type === "Received" ? "bg-success/20" :
-                    tx.type === "Sent" ? "bg-destructive/20" :
-                    tx.type === "Swapped" ? "bg-accent/20" :
-                    "bg-primary/20"
-                  }`}>
-                    {tx.type === "Received" && <Download className="w-5 h-5 text-success" />}
-                    {tx.type === "Sent" && <Send className="w-5 h-5 text-destructive" />}
-                    {tx.type === "Swapped" && <ArrowUpDown className="w-5 h-5 text-accent" />}
-                    {tx.type === "Staking" && <Plus className="w-5 h-5 text-primary" />}
-                  </div>
-                  <div>
-                    <div className="font-semibold text-foreground">{tx.type}</div>
-                    <div className="text-sm text-muted-foreground">{tx.asset}</div>
-                  </div>
-                </div>
-                
-                <div className="text-right">
-                  <div className={`font-semibold ${
-                    tx.type === "Received" || tx.type === "Staking" ? "text-success" : 
-                    tx.type === "Sent" ? "text-destructive" : "text-foreground"
-                  }`}>
-                    {tx.amount}
-                  </div>
-                  <div className="text-sm text-muted-foreground">{tx.value}</div>
-                </div>
-                
-                <div className="text-right text-sm text-muted-foreground hidden md:block">
-                  <div>{tx.time}</div>
-                  <Badge variant="secondary" className="text-xs">
-                    {tx.status}
-                  </Badge>
-                </div>
-              </div>
-            ))}
-          </div>
+          <RecentTransactions />
         </CardContent>
       </Card>
 

@@ -23,11 +23,22 @@ interface SwapQuote {
 }
 
 const POPULAR_TOKENS: Token[] = [
+  // Major Cryptocurrencies
   { symbol: 'ETH', name: 'Ethereum', address: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', decimals: 18 },
+  { symbol: 'BTC', name: 'Bitcoin', address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', decimals: 8 },
+  { symbol: 'WBTC', name: 'Wrapped Bitcoin', address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', decimals: 8 },
+  { symbol: 'BNB', name: 'BNB', address: '0xB8c77482e45F1F44dE1745F52C74426C631bDD52', decimals: 18 },
+  { symbol: 'POL', name: 'Polygon', address: '0x455e53CBB86018Ac2B8092FdCd39d8444aFFC3F6', decimals: 18 },
+  { symbol: 'MATIC', name: 'Polygon (Old)', address: '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0', decimals: 18 },
+  
+  // Stablecoins
   { symbol: 'USDT', name: 'Tether USD', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6 },
   { symbol: 'USDC', name: 'USD Coin', address: '0xA0b86a33E6441E435D33c4EBa1f5CbCa3cE6de6c', decimals: 6 },
-  { symbol: 'WBTC', name: 'Wrapped Bitcoin', address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', decimals: 8 },
   { symbol: 'DAI', name: 'Dai Stablecoin', address: '0x6B175474E89094C44Da98b954EedeAC495271d0F', decimals: 18 },
+  { symbol: 'BUSD', name: 'Binance USD', address: '0x4Fabb145d64652a948d72533023f6E7A623C7C53', decimals: 18 },
+  { symbol: 'FRAX', name: 'Frax', address: '0x853d955aCEf822Db058eb8505911ED77F175b99e', decimals: 18 },
+  
+  // DeFi Tokens
   { symbol: 'UNI', name: 'Uniswap', address: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984', decimals: 18 },
   { symbol: 'LINK', name: 'Chainlink', address: '0x514910771AF9Ca656af840dff83E8264EcF986CA', decimals: 18 },
   { symbol: 'AAVE', name: 'Aave', address: '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9', decimals: 18 },
@@ -35,6 +46,29 @@ const POPULAR_TOKENS: Token[] = [
   { symbol: 'MKR', name: 'Maker', address: '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2', decimals: 18 },
   { symbol: 'COMP', name: 'Compound', address: '0xc00e94Cb662C3520282E6f5717214004A7f26888', decimals: 18 },
   { symbol: 'SNX', name: 'Synthetix', address: '0xC011a73ee8576Fb46F5E1c5751cA3B9Fe0af2a6F', decimals: 18 },
+  { symbol: 'SUSHI', name: 'SushiSwap', address: '0x6B3595068778DD592e39A122f4f5a5cF09C90fE2', decimals: 18 },
+  { symbol: '1INCH', name: '1inch Token', address: '0x111111111117dC0aa78b770fA6A738034120C302', decimals: 18 },
+  
+  // Layer 2 & Alt Chains
+  { symbol: 'ARB', name: 'Arbitrum', address: '0x912CE59144191C1204E64559FE8253a0e49E6548', decimals: 18 },
+  { symbol: 'OP', name: 'Optimism', address: '0x4200000000000000000000000000000000000042', decimals: 18 },
+  { symbol: 'AVAX', name: 'Avalanche', address: '0x85f138bfEE4ef8e540890CFb48F620571d67Eda3', decimals: 18 },
+  { symbol: 'FTM', name: 'Fantom', address: '0x4E15361FD6b4BB609Fa63C81A2be19d873717870', decimals: 18 },
+  
+  // U2U Network Tokens
+  { symbol: 'U2U', name: 'U2U Network', address: '0x1234567890123456789012345678901234567890', decimals: 18 },
+  { symbol: 'U2DPN', name: 'U2U DPN Token', address: '0x2345678901234567890123456789012345678901', decimals: 18 },
+  
+  // Meme Coins
+  { symbol: 'DOGE', name: 'Dogecoin', address: '0x4206931337dc273a630d328dA6441786BfaD668f', decimals: 8 },
+  { symbol: 'SHIB', name: 'Shiba Inu', address: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE', decimals: 18 },
+  { symbol: 'PEPE', name: 'Pepe', address: '0x6982508145454Ce325dDbE47a25d4ec3d2311933', decimals: 18 },
+  
+  // Additional Popular Tokens
+  { symbol: 'LDO', name: 'Lido DAO', address: '0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32', decimals: 18 },
+  { symbol: 'GRT', name: 'The Graph', address: '0xc944E90C64B2c07662A292be6244BDf05Cda44a7', decimals: 18 },
+  { symbol: 'ENS', name: 'Ethereum Name Service', address: '0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72', decimals: 18 },
+  { symbol: 'APE', name: 'ApeCoin', address: '0x4d224452801ACEd8B2F0aebE155379bb5D594381', decimals: 18 },
 ];
 
 export const SwapInterface = () => {
